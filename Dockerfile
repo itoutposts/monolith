@@ -1,22 +1,8 @@
-FROM ekidd/rust-musl-builder as builder
+FROM ubuntu:18.04
 
-RUN curl -L -o monolith.tar.gz $(curl -s https://api.github.com/repos/y2z/monolith/releases/latest \
-                                 | grep "tarball_url.*\"," \
-                                 | cut -d '"' -f 4)
-RUN tar xfz monolith.tar.gz \
-    && mv Y2Z-monolith-* monolith \
-    && rm monolith.tar.gz
-
-WORKDIR monolith/
-RUN make install
-
-
-FROM alpine
-
-RUN apk update && \
-  apk add --no-cache openssl && \
-  rm -rf "/var/cache/apk/*"
-
-COPY --from=builder /home/rust/.cargo/bin/monolith /usr/bin/monolith
-WORKDIR /tmp
-ENTRYPOINT ["/usr/bin/monolith"]
+RUN apt update
+RUN apt install -y wget
+RUN wget https://github.com/Y2Z/monolith/releases/download/v2.7.0/monolith-gnu-linux-aarch64
+RUN chmod +x monolith-gnu-linux-aarch64
+RUN apt install -y python
+RUN cp monolith-gnu-linux-aarch64 /usr/bin/monolith
